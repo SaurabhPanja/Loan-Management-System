@@ -31,7 +31,6 @@ class UserModelTest(TestCase):
         User.objects.create(email=email, role='admin')
         u_admin = User.objects.get(email=email)
         self.assertEqual(u_admin.role, 'admin')
-        self.assertEqual(u_admin.is_active, False)        
 
     def test_agent_role(self):
         email = "agent@gmail.com"
@@ -40,7 +39,6 @@ class UserModelTest(TestCase):
         u_agent = User.objects.get(email=email)
 
         self.assertEqual(u_agent.role,'agent')
-        self.assertEqual(u_agent.is_active, False)
 
     def test_customer_role(self):
         email = "customer@gmail.com"
@@ -49,6 +47,5 @@ class UserModelTest(TestCase):
         u_customer = User.objects.get(email=email)
 
         self.assertEqual(u_customer.role,'customer')
-        self.assertEqual(u_customer.role,True)
 
 
