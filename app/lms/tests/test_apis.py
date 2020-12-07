@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-CREATE_USER_URL = reverse('user:create')
+CREATE_USER_URL = reverse('lms:create_user')
 
 class UserApiTest(TestCase):
     customer_email = "customer@email.com"
@@ -32,7 +32,7 @@ class UserApiTest(TestCase):
 
         user = User.objects.get(email=self.customer_email)
 
-        self.asserTrue(user.exists())
+        self.assertTrue(user)
         self.assertTrue(user.check_password(payload['password']))
         self.assertTrue(user.is_active)
 
@@ -49,7 +49,7 @@ class UserApiTest(TestCase):
         
         user = User.objects.get(email=self.agent_email)
         
-        self.asserTrue(user.exists())
+        self.assertTrue(user)
         self.assertTrue(user.check_password(payload['password']))
         self.assertFalse(user.is_active)
     
@@ -65,10 +65,10 @@ class UserApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
 
         user = User.objects.get(email=self.admin_email)
-        
-        self.asserTrue(user.exists())
+
+        self.assertTrue(user)
         self.assertTrue(user.check_password(payload['password']))
-        self.assertTrue(user.is_active)
+        self.assertFalse(user.is_active)
 
     # def test_all_users_get_as_customer(self):
     #     factory = APIRequestFactory()
