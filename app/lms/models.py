@@ -23,3 +23,9 @@ class User(models.Model):
         hash_obj.update(str(password).encode('utf-8'))
         hash_obj.update(str(SECRET_KEY).encode('utf-8'))
         self.password_hash = hash_obj.hexdigest()
+    
+    def check_password(self, password):
+        hash_obj = hashlib.sha256()
+        hash_obj.update(str(password).encode('utf-8'))
+        hash_obj.update(str(SECRET_KEY).encode('utf-8'))   
+        return self.password_hash == hash_obj.hexdigest()

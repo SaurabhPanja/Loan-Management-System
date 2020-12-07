@@ -24,6 +24,14 @@ class UserModelTest(TestCase):
         password_hash = hash_obj.hexdigest()
 
         self.assertEqual(password_hash, User.objects.get(email=self.email).password_hash)
+    
+    def test_check_password(self):
+        u = User.objects.get(email=self.email)
+        check_password_true = u.check_password(self.password)
+        check_password_false = u.check_password("hakunamata")
+
+        self.assertTrue(check_password_true)
+        self.assertFalse(check_password_false)
 
     def test_admin_role(self):
         email = "xyv@gmail.com"
