@@ -1,2 +1,2 @@
-from .test_models import *
-from .test_apis import *
+from .apis import *
+from .models import *

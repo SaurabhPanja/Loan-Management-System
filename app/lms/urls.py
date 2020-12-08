@@ -6,4 +6,5 @@ app_name = 'lms'
 
 urlpatterns = [
     path('users/', views.create_user, name='create_user'),
+    path('login/', views.login, name='login'),
 ]
