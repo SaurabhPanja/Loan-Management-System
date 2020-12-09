@@ -57,8 +57,8 @@ def decode_token(encoded):
 
         return email, role 
 
-# def authenticate_user(func):
-#     def jwt_verify(request, *args, **kwargs):
+# def authorize_user(func):
+#     def wrap(request, *args, **kwargs):
 #         dprint(dir(request))
         
 
@@ -113,7 +113,7 @@ def create_or_get_user(request):
             if role == 'customer':
                 return JsonResponse({'message' : 'Invalid Request. Unauthorized.'}, status=status.HTTP_401_UNAUTHORIZED)
             elif role == 'agent':
-                all_users = User.objects.filter(Q(role='customer') | Q(role='agent')).values('email', 'role')
+                all_users = User.objects.filter(Q(role='customer') | Q(role='agent')).values('email', 'role','is_active')
             elif role == 'admin':
                 all_users = User.objects.all().values('email', 'role')
             
@@ -138,6 +138,10 @@ def login(request):
             user = User.objects.filter(email=email)
             if user.exists():
                 user = user.first()
+                if not user.is_active:
+                    return JsonResponse({
+                        'message' : 'User is not active'
+                    }, status=status.HTTP_403_FORBIDDEN)
             else:
                 return JsonResponse(
                     {

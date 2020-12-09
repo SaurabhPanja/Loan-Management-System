@@ -9,26 +9,24 @@ import time
 from pprint import pprint
 from .helper_setUp_func import setUp_users
 
-LOGIN_URL = reverse('lms:login')
 # APPROVE_URL = reverse('lms:approve_user')
 
-class UserApiTest(TestCase):
-    customer_email = "customer@email.com"
-    customer_password = "customer1"
+# class UserApiTest(TestCase):
+#     def setUp(self):
+#         self.client = APIClient()     
 
-    agent_email = "agent@email.com"
-    agent_password = "agent1234"
+#         self.customer_login_token , self.agent_login_token, self.admin_login_token = setUp_users()
 
-    admin_email = "admin@email.com"
-    admin_password = "admin1234"
+#     def test_approve_admin_by_admin(self):
+#         all_admins = User.objects.filter(role='admim')
+#         admin_1 = all_admins.first()
+#         admin_2 = all_admins.last()
+#         #making admin_2 active
+#         admin_2.is_active = True
+#         admin_2.save()
 
-    def setUp(self):
-        self.client = APIClient()     
-
-        self.customer_login_token , self.agent_login_token, self.admin_login_token = setUp_users()
-
-    def test_approve_admin_by_admin(self):
-        pass
+#         self.assertFalse(admin_1.role)
+#         self.ass
 
     # def test_approve_admin_by_agent(self):
     #     pass

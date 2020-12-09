@@ -24,18 +24,21 @@ class AuthApiTest(TestCase):
         customer_user.email = self.customer_email
         customer_user.save_password_hash(password=self.customer_password)
         customer_user.role = 'customer'
+        customer_user.is_active = True
         customer_user.save()
 
         admin_user = User()
         admin_user.email = self.admin_email
         admin_user.save_password_hash(password=self.admin_password)
         admin_user.role = 'admin'
+        admin_user.is_active = True
         admin_user.save()    
 
         agent_user = User()
         agent_user.email = self.agent_email
         agent_user.save_password_hash(password=self.agent_password)
         agent_user.role = 'agent'
+        agent_user.is_active = True
         agent_user.save()            
 
     def test_login_create_token(self):
@@ -109,5 +112,56 @@ class AuthApiTest(TestCase):
         decoded_token = jwt.decode(access_token, SECRET_KEY, algorithm='HS256')
         
         self.assertEqual('agent', decoded_token['role'])
+    
+    def test_generate_token_only_if_is_active_customer(self):
+        new_customer_email = "newcustomer@gmail.com"
+        new_customer_password = "password"
+        new_customer = User()
+        new_customer.email = new_customer_email
+        new_customer.save_password_hash(new_customer_password)
+        new_customer.is_active = False
+        new_customer.save()
+
+        payload = {
+            'email' : new_customer_email,
+            'password' : new_customer_password,
+        }
+       
+        res = self.client.post(LOGIN_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_generate_token_only_if_is_active_agent(self):
+        new_agent_email = "newagent@gmail.com"
+        new_agent_password = "password"
+        new_agent = User()
+        new_agent.email = new_agent_email
+        new_agent.save_password_hash(new_agent_password)
+        new_agent.save()
+
+        payload = {
+            'email' : new_agent_email,
+            'password' : new_agent_password,
+        }
+       
+        res = self.client.post(LOGIN_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_generate_token_only_if_is_active_admin(self):
+        new_admin_email = "newcustomer@gmail.com"
+        new_admin_password = "password"
+        new_admin = User()
+        new_admin.email = new_admin_email
+        new_admin.save_password_hash(new_admin_password)
+        new_admin.save()
+
+        payload = {
+            'email' : new_admin_email,
+            'password' : new_admin_password,
+        }
+       
+        res = self.client.post(LOGIN_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)        
+
+
 
 

@@ -13,11 +13,13 @@ def setUp_users():
     customer_2.create_user(email="customer2@app.com", password="toogoodpassword")
 
     agent_1 = User()
+    agent_1.is_active = True
     agent_1.create_user(email="agent@vinod.com", password="bunglekepechehaitaal", role="agent")
     agent_2 = User()
     agent_2.create_user(email="agent@sharekhan.com", password="wholetthedogsout", role="agent")
 
     admin_1 = User()
+    admin_1.is_active = True
     admin_1.create_user(email="nice@admin.com", password="isadminnow", role="admin")
     admin_2 = User()
     admin_2.create_user(email="verynice@admin.com", password="wowniceadmin", role="admin")   
