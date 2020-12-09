@@ -11,6 +11,8 @@ import re
 from django.core.exceptions import ValidationError
 from pprint import pprint
 from django.db.models import Q
+from django.shortcuts import redirect
+from django.urls import reverse
 
 def internal_server_error():
     response = {
@@ -57,9 +59,47 @@ def decode_token(encoded):
 
         return email, role 
 
-# def authorize_user(func):
-#     def wrap(request, *args, **kwargs):
-#         dprint(dir(request))
+def authorize_user(func):
+    def wrap(request, *args, **kwargs):
+        encoded = request.META.get('HTTP_AUTHORIZATION', '')
+        try:
+            jwt.decode(encoded, SECRET_KEY, algorithms=['HS256'])
+        except Exception as e:
+            return JsonResponse({'message' : 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)        
+
+        return func(request, *args, **kwargs)
+    
+    wrap.__doc__ = func.__doc__
+    wrap.__name__ = func.__name__
+    
+    return wrap
+
+@authorize_user
+def change_user_status(request, id):
+    if request.method == "POST":
+        encoded = request.META.get('HTTP_AUTHORIZATION', '')
+        email, role = decode_token(encoded)
+        to_approve_user = User.objects.filter(pk=id)
+
+        if to_approve_user.exists():
+            to_approve_user = to_approve_user.first()
+        else:
+            return JsonResponse(
+                {
+                    'message' : 'No user found to approve. Bad Request',
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if role == 'admin':
+            to_approve_user.is_active = not to_approve_user.is_active
+        elif role == 'agent' and to_approve_user.role == 'customer':
+            to_approve_user.is_active = not to_approve_user.is_active
+        else:
+            return JsonResponse({'message': 'Invalid request'}, status=status.HTTP_403_FORBIDDEN)
+
+        to_approve_user.save()
+        return JsonResponse({'message': 'User approved'}, status=status.HTTP_202_ACCEPTED)
+    else:
+        return JsonResponse({})
         
 
 #users api

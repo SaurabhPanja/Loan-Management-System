@@ -3,7 +3,7 @@ from app.settings import SECRET_KEY
 import hashlib
 
 class User(models.Model):
-    email = models.EmailField(max_length=100, primary_key=True)
+    email = models.EmailField(max_length=100, unique=True)
     password_hash = models.CharField(max_length=300, blank=True)
     ROLE = [
         ('admin','admin'),
