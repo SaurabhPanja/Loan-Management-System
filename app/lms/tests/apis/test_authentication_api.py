@@ -7,6 +7,7 @@ import jwt
 from app.settings import SECRET_KEY
 
 LOGIN_URL = reverse('lms:login')
+USER_URL = reverse('lms:create_or_get_user')
 
 class AuthApiTest(TestCase):
     customer_email = "customer@email.com"
@@ -66,12 +67,6 @@ class AuthApiTest(TestCase):
 
         res = self.client.post(LOGIN_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    # def test_token_is_invalid(self):
-    #     pass
-
-    # def test_token_expiration(self):
-    #     pass
 
     def test_user_is_customer(self):
         payload = {

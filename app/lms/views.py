@@ -8,6 +8,9 @@ import os
 import sys
 import json
 import re
+from django.core.exceptions import ValidationError
+from pprint import pprint
+from django.db.models import Q
 
 def internal_server_error():
     response = {
@@ -20,7 +23,7 @@ def validate_token(token):
     pass
 
 def excpetion_log():
-    print("****************************")
+    print("\n****************************")
     exception_type, exception_object, exception_traceback = sys.exc_info()
     filename = exception_traceback.tb_frame.f_code.co_filename
     line_number = exception_traceback.tb_lineno
@@ -30,6 +33,7 @@ def excpetion_log():
     print("****************************")    
 
 def dprint(str):
+    print("\n")
     print("*"*100)
     print(str)
     print("*"*100)
@@ -46,29 +50,48 @@ def check_email(email):
 
     return re.search(regex,email)
 
+def decode_token(encoded):
+        decoded = jwt.decode(encoded, SECRET_KEY, algorithms=['HS256'])
+        email = decoded['email']
+        role = decoded['role']   
+
+        return email, role 
+
+# def authenticate_user(func):
+#     def jwt_verify(request, *args, **kwargs):
+#         dprint(dir(request))
+        
+
 #users api
-def create_user(request):
+def create_or_get_user(request):
     error = False
     if request.method == "POST":
         try:
             request_data = request.POST       
 
-            if 'email' in request_data and 'password' in request_data:
-                if  not check_email(request_data['email']):
+            if 'email' in request_data and 'password' in request_data and 'role' in request_data:
+                email = request_data['email']
+                password = request_data['password']
+                role = request_data.get('role')
+
+                if role not in ['admin', 'customer', 'agent']:
+                    return JsonResponse({'message': 'Invliad role'}, status=status.HTTP_400_BAD_REQUEST)
+
+                if  not check_email(email):
                     return JsonResponse({'message' : 'Invalid email'}, status=status.HTTP_400_BAD_REQUEST)
 
-                if len(request_data['password']) < 8:
-                    return JsonResponse({'message' : 'password too short'}, status=status.HTTP_400_BAD_REQUEST)
-                    
+                if len(password) < 8:
+                    return JsonResponse({'message' : 'password should be more than 8 characters'}, status=status.HTTP_400_BAD_REQUEST)
+
                 new_user = User()
-                new_user.email = request_data['email']
-                new_user.save_password_hash(request_data['password'])
-                new_user.role = 'customer'
-                if request_data['role'] == 'customer':
-                    new_user.is_active = True    
-                new_user.save()
+                new_user.create_user(email=email, password=password, role=role)
             else:
                 return bad_request()
+        
+        except ValidationError as e:
+            return JsonResponse({
+                'message' : e.messages[0]
+            }, status=status.HTTP_409_CONFLICT)
 
         except:
             error = True
@@ -83,8 +106,26 @@ def create_user(request):
             }
 
             return JsonResponse(response, status=status.HTTP_201_CREATED)
-    else:
-        pass
+    elif request.method == "GET":
+        encoded = request.META.get('HTTP_AUTHORIZATION', '')
+        try:
+            email, role = decode_token(encoded)
+            if role == 'customer':
+                return JsonResponse({'message' : 'Invalid Request. Unauthorized.'}, status=status.HTTP_401_UNAUTHORIZED)
+            elif role == 'agent':
+                all_users = User.objects.filter(Q(role='customer') | Q(role='agent')).values('email', 'role')
+            elif role == 'admin':
+                all_users = User.objects.all().values('email', 'role')
+            
+            response = {
+                'users' : list(all_users),
+            }
+
+            return JsonResponse(response, status=status.HTTP_200_OK)
+        except Exception as e:
+            # dprint(e)
+            return JsonResponse({'message' : 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 def login(request):
     error = False

@@ -1,8 +1,6 @@
 from django.db import models
 from app.settings import SECRET_KEY
 import hashlib
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 
 class User(models.Model):
     email = models.EmailField(max_length=100, primary_key=True)
@@ -29,3 +27,12 @@ class User(models.Model):
         hash_obj.update(str(password).encode('utf-8'))
         hash_obj.update(str(SECRET_KEY).encode('utf-8'))   
         return self.password_hash == hash_obj.hexdigest()
+    
+    def create_user(self, email, password, role="customer"):
+        self.email = email
+        self.validate_unique()
+        self.save_password_hash(password=password)
+        self.role = role
+        if role == "customer":
+            self.is_active = True
+        self.save()
