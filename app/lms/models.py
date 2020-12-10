@@ -36,3 +36,25 @@ class User(models.Model):
         if role == "customer":
             self.is_active = True
         self.save()
+
+class Loan(models.Model):
+    created_for = models.ForeignKey(User, on_delete=models.CASCADE, related_name='customer')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='agent')
+    approved_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin')
+    is_approved = models.BooleanField(default=False)
+    principal_amount = models.IntegerField(default=0)
+    interest_rate = models.FloatField(default=0.0)
+    tenure_months = models.IntegerField(default=0)
+    emi = models.FloatField(default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    STATUS = [
+        ('new','new'),
+        ('rejected','rejected'),
+        ('approved', 'approved')
+    ]    
+    status = models.CharField(max_length=10, default='new', choices=STATUS)
+    # edit_history = 
+    #one to many
+
+# class EditLoanHistory(models.Model):
+#     pass
