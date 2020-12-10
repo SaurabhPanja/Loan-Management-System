@@ -74,32 +74,113 @@ def authorize_user(func):
     
     return wrap
 
-@authorize_user
-def change_user_status(request, id):
-    if request.method == "POST":
-        encoded = request.META.get('HTTP_AUTHORIZATION', '')
-        email, role = decode_token(encoded)
-        to_approve_user = User.objects.filter(pk=id)
+def json_user_obj(user):
+    return {
+        'id' : user.id,
+        'email' : user.email,
+        'role' : user.role,
+        'is_active' : user.is_active
+    }
 
-        if to_approve_user.exists():
-            to_approve_user = to_approve_user.first()
-        else:
+@authorize_user
+def get_user(request, id):
+    if request.method == "GET":
+        error = False
+        try:
+            encoded = request.META.get('HTTP_AUTHORIZATION', '')
+            email, role = decode_token(encoded)
+
+            queried_user = User.objects.filter(pk=id)
+
+            if queried_user.exists():
+                queried_user = queried_user.first()
+            else:
+                return JsonResponse(
+                    {
+                        'message' : 'No user found. Bad Request',
+                    }, status=status.HTTP_400_BAD_REQUEST)      
+
+            # dprint(queried_user.email)
+            
+            if role == 'admin':
+                return JsonResponse({
+                    'user' : json_user_obj(queried_user)
+                }, status=status.HTTP_200_OK)
+            
+            if role == 'agent' and ( queried_user.role == 'customer' or queried_user.email == email):
+                return JsonResponse({
+                    'user' : json_user_obj(queried_user)
+                }, status=status.HTTP_200_OK)       
+
+            if role == 'customer' and queried_user.email == email:
+                return JsonResponse({
+                    'user' : json_user_obj(queried_user)
+                }, status=status.HTTP_200_OK)   
+
             return JsonResponse(
                 {
-                    'message' : 'No user found to approve. Bad Request',
-                }, status=status.HTTP_400_BAD_REQUEST)
-        
-        if role == 'admin':
-            to_approve_user.is_active = not to_approve_user.is_active
-        elif role == 'agent' and to_approve_user.role == 'customer':
-            to_approve_user.is_active = not to_approve_user.is_active
-        else:
-            return JsonResponse({'message': 'Invalid request'}, status=status.HTTP_403_FORBIDDEN)
+                    'message' : 'Forbidden request'
+                }, status=status.HTTP_403_FORBIDDEN
+            )                        
 
-        to_approve_user.save()
-        return JsonResponse({'message': 'User approved'}, status=status.HTTP_202_ACCEPTED)
+
+        except Exception as e:
+            dprint(e)
+            error = True
+            excpetion_log()            
+
+        if error:
+            return internal_server_error()
+
     else:
-        return JsonResponse({})
+        return bad_request()
+
+
+@authorize_user
+def edit_user(request, id):
+    if request.method == "POST":
+        error = False
+        try:
+            encoded = request.META.get('HTTP_AUTHORIZATION', '')
+            to_edit_email = request.POST.get('email','')
+            to_edit_is_active = request.POST.get('is_active','')
+
+            if not to_edit_email and not to_edit_is_active:
+                return JsonResponse({'message': 'Bad Request. All values are required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            to_edit_is_active = True if to_edit_is_active.lower() == 'true' else False
+
+            email, role = decode_token(encoded)
+            to_approve_user = User.objects.filter(pk=id)
+
+            if to_approve_user.exists():
+                to_approve_user = to_approve_user.first()
+            else:
+                return JsonResponse(
+                    {
+                        'message' : 'No user found to approve. Bad Request',
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            if role == 'admin':
+                to_approve_user.email = to_edit_email
+                to_approve_user.is_active = to_edit_is_active
+            elif role == 'agent' and to_approve_user.role == 'customer':
+                to_approve_user.email = to_edit_email
+                to_approve_user.is_active = to_edit_is_active
+            else:
+                return JsonResponse({'message': 'Invalid request'}, status=status.HTTP_403_FORBIDDEN)
+
+            to_approve_user.save()
+            return JsonResponse({'message': 'User approved'}, status=status.HTTP_202_ACCEPTED)
+        except Exception as e:
+            dprint(e)
+            error = True
+            excpetion_log()
+        
+        if error:
+            return internal_server_error()
+    else:
+        return bad_request()
         
 
 #users api
@@ -155,7 +236,7 @@ def create_or_get_user(request):
             elif role == 'agent':
                 all_users = User.objects.filter(Q(role='customer') | Q(role='agent')).values('email', 'role','is_active')
             elif role == 'admin':
-                all_users = User.objects.all().values('email', 'role')
+                all_users = User.objects.all().values('email', 'role', 'is_active')
             
             response = {
                 'users' : list(all_users),
@@ -219,6 +300,9 @@ def login(request):
         
         if error:
             return internal_server_error()
+    else:
+        return bad_request()
+
 
 
 
