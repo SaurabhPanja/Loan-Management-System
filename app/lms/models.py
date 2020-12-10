@@ -40,7 +40,7 @@ class User(models.Model):
 class Loan(models.Model):
     created_for = models.ForeignKey(User, on_delete=models.CASCADE, related_name='customer')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='agent')
-    approved_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin')
+    approved_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin',blank=True, null=True)
     is_approved = models.BooleanField(default=False)
     principal_amount = models.IntegerField(default=0)
     interest_rate = models.FloatField(default=0.0)

@@ -9,4 +9,5 @@ urlpatterns = [
     path('login/', views.login, name='login'),
     path('user/<int:id>/edit/', views.edit_user, name='edit_user'),
     path('user/<int:id>/', views.get_user, name='get_user'),
+    path('create-loan/', views.create_loan, name='create_loan'),
 ]

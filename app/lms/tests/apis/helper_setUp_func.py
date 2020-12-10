@@ -22,7 +22,7 @@ def setUp_users():
     admin_1.is_active = True
     admin_1.create_user(email="nice@admin.com", password="isadminnow", role="admin")
     admin_2 = User()
-    admin_2.create_user(email="verynice@admin.com", password="wowniceadmin", role="admin")   
+    admin_2.create_user(email="verynice@admin.com", password="wowniceadmin", role="admin")     
 
     #login
     cutomer_login_payload = {
