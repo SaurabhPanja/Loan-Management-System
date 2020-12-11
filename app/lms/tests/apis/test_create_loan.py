@@ -126,3 +126,14 @@ class CreateLoanTest(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION=self.agent_login_token)
         res = self.client.post(CREATE_LOAN_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)     
+
+    def test_invalid_loan_value(self):
+        payload = {
+            'customer-id' : self.customer_1.id,
+            'principal-amount' : -1000,
+            'interest-rate' : 5000,
+            'tenure-months' : 4.8
+        }
+        self.client.credentials(HTTP_AUTHORIZATION=self.agent_login_token)
+        res = self.client.post(CREATE_LOAN_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)  

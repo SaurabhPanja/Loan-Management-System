@@ -3,3 +3,4 @@ from .edit_user import edit_user
 from .get_user import get_user
 from .login import login
 from .create_loan import create_loan
+from .approve_loan import approve_loan

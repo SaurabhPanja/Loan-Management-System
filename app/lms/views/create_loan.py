@@ -44,6 +44,10 @@ def create_loan(request):
                 principal_amount = float(principal_amount)
                 interest_rate = float(interest_rate)
                 tenure = int(tenure)
+
+                if principal_amount < 1 or interest_rate < 0 or interest_rate > 100 or tenure < 0:
+                    return bad_request()
+
                 emi = calculate_emi(principal_amount, interest_rate, tenure)
 
                 Loan.objects.create(
