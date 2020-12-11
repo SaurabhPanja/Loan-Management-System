@@ -1,7 +1,10 @@
 from django.db import models
 from app.settings import SECRET_KEY
 import hashlib
-
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from lms.utils import check_email
+from django.core.exceptions import ValidationError
 class User(models.Model):
     email = models.EmailField(max_length=100, unique=True)
     password_hash = models.CharField(max_length=300, blank=True)
@@ -58,3 +61,9 @@ class Loan(models.Model):
 
 # class EditLoanHistory(models.Model):
 #     pass
+
+
+@receiver(pre_save, sender=Loan)
+def validate_loan_data(instance, sender, **kwargs):
+    if instance.principal_amount < 1 or instance.interest_rate < 0 or instance.interest_rate > 100 or instance.tenure_months < 0:
+        raise ValidationError("Invalid value in loan db.")

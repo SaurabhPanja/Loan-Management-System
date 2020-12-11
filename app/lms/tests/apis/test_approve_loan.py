@@ -57,10 +57,12 @@ class ApproveLoanTest(TestCase):
 
     def test_approve_loan_by_admin(self):
         loan_obj = Loan.objects.last()
+        self.assertFalse(loan_obj.is_approved)
         approve_loan_url = reverse('lms:approve_loan' , kwargs={'id' : loan_obj.id})
         self.client.credentials(HTTP_AUTHORIZATION=self.admin_login_token)
         res = self.client.post(approve_loan_url)
 
+        loan_obj = Loan.objects.last()
         self.assertEqual(res.status_code, status.HTTP_202_ACCEPTED)
         self.assertTrue(loan_obj.is_approved)
         self.assertEqual(loan_obj.status,'approved')
