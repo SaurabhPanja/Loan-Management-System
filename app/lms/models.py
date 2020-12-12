@@ -50,17 +50,32 @@ class Loan(models.Model):
     tenure_months = models.IntegerField(default=0)
     emi = models.FloatField(default=0.0)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     STATUS = [
         ('new','new'),
         ('rejected','rejected'),
         ('approved', 'approved')
     ]    
     status = models.CharField(max_length=10, default='new', choices=STATUS)
-    # edit_history = 
-    #one to many
 
-# class EditLoanHistory(models.Model):
-#     pass
+class EditLoanHistory(models.Model):
+    edit_history_of = models.ForeignKey(Loan, on_delete=models.CASCADE,blank=True, null=True)
+    created_for = models.ForeignKey(User, on_delete=models.CASCADE, related_name='customer_edit_loan')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='agent_edit_loan')
+    approved_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin_edit_loan',blank=True, null=True)
+    is_approved = models.BooleanField(default=False)
+    principal_amount = models.IntegerField(default=0)
+    interest_rate = models.FloatField(default=0.0)
+    tenure_months = models.IntegerField(default=0)
+    emi = models.FloatField(default=0.0)
+    created_at = models.DateTimeField()
+    STATUS = [
+        ('new','new'),
+        ('rejected','rejected'),
+        ('approved', 'approved')
+    ]    
+    status = models.CharField(max_length=10, default='new', choices=STATUS) 
+    instance_created_at = models.DateTimeField(auto_now_add=True)
 
 
 @receiver(pre_save, sender=Loan)

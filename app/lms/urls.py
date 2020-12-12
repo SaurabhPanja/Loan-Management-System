@@ -11,4 +11,5 @@ urlpatterns = [
     path('user/<int:id>/', views.get_user, name='get_user'),
     path('create-loan/', views.create_loan, name='create_loan'),
     path('approve-loan/<int:id>/', views.approve_loan, name='approve_loan'),
+    path('loan/<int:id>/edit/', views.edit_loan, name="edit_loan"),
 ]
