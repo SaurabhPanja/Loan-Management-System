@@ -5,3 +5,4 @@ from .login import login
 from .create_loan import create_loan
 from .approve_loan import approve_loan
 from .edit_loan import edit_loan
+from .rollback_loan import rollback_loan
