@@ -30,7 +30,6 @@ def query_loan(request):
             created_date = request.GET.get('created-date', '')
             updated_date = request.GET.get('updated-date', '')
             loan_status = request.GET.get('loan-status', '')
-            updated_date = request.GET.get('updated-date', '')
 
             if role == 'customer':
                 customer = User.objects.get(email=email)
