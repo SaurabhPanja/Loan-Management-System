@@ -44,6 +44,7 @@ def check_email(email):
     return re.search(regex,email)
 
 def decode_token(encoded):
+        encoded = encoded.split(' ')[-1] if encoded else ''
         decoded = jwt.decode(encoded, SECRET_KEY, algorithms=['HS256'])
         email = decoded['email']
         role = decoded['role']   
@@ -53,6 +54,7 @@ def decode_token(encoded):
 def authorize_user(func):
     def wrap(request, *args, **kwargs):
         encoded = request.META.get('HTTP_AUTHORIZATION', '')
+        encoded = encoded.split(' ')[-1] if encoded else ''
         try:
             jwt.decode(encoded, SECRET_KEY, algorithms=['HS256'])
         except Exception as e:

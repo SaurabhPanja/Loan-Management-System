@@ -58,7 +58,7 @@ def rollback_loan(request, loan_id, edit_id):
                 loan_obj.emi = loan_edit_obj.emi
                 loan_obj.save()
 
-                return JsonResponse({'message': 'Loan approved'}, status=status.HTTP_202_ACCEPTED)
+                return JsonResponse({'message': 'Loan roll backed to edit id '  + str(loan_edit_obj.id)}, status=status.HTTP_202_ACCEPTED)
 
             else:
                 return JsonResponse({'message': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)

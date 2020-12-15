@@ -39,7 +39,7 @@ def create_or_get_user(request):
                 new_user = User()
                 new_user.create_user(email=email, password=password, role=role)
             else:
-                return bad_request()
+                return JsonResponse({'message': 'Invalid inputs'}, status=400)
         
         except ValidationError as e:
             return JsonResponse({
@@ -61,6 +61,7 @@ def create_or_get_user(request):
             return JsonResponse(response, status=status.HTTP_201_CREATED)
     elif request.method == "GET":
         encoded = request.META.get('HTTP_AUTHORIZATION', '')
+        encoded = encoded.split(' ')[-1] if encoded else ''
         try:
             email, role = decode_token(encoded)
             if role == 'customer':
@@ -68,7 +69,7 @@ def create_or_get_user(request):
             elif role == 'agent':
                 all_users = User.objects.filter(Q(role='customer') | Q(role='agent')).values('email', 'role','is_active')
             elif role == 'admin':
-                all_users = User.objects.all().values('email', 'role', 'is_active')
+                all_users = User.objects.all().values('email', 'role', 'is_active', 'id')
             
             response = {
                 'users' : list(all_users),
