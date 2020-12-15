@@ -72,3 +72,4 @@ def json_user_obj(user):
         'role' : user.role,
         'is_active' : user.is_active
     }
+
