@@ -26,12 +26,12 @@ To create a user, make a POST request at this route
 
     '/api/users/'
     with payload {'emai':email, 'password' : password, 'role': role}
-
 By default when a user other than a customer is created using this API route. The user is not active. An inactive user is as good as a non-existent user. It doesn't have any privileges. An admin has to activate the user so that the user can use the system.
 Only admin can activate an agent.  
 An agent cannot activate another agent.  
 An admin can activate another admin.  
 A customer is active by default. But can be changed by agent and admin user.
+
 ---
 To view all users, make a GET request at this route.
 
